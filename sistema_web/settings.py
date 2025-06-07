@@ -73,17 +73,20 @@ WSGI_APPLICATION = 'sistema_web.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'nombre_de_tu_base',
-        'USER': 'tu_usuario',
-        'PASSWORD': 'tu_contraseña',
+        'NAME': 'sistema',         # por ejemplo
+        'USER': 'postgres',              # usuario de tu PostgreSQL
+        'PASSWORD': '1234',          # contraseña de tu usuario
         'HOST': 'localhost',
         'PORT': '5432',
+        'OPTIONS': {
+            'client_encoding': 'utf8',
+        }
     }
 }
+
 
 
 # Password validation

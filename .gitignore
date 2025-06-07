@@ -5,3 +5,5 @@ db.sqlite3
 # Archivos de configuración temporales
 *.pyc
 __pycache__/
+
+

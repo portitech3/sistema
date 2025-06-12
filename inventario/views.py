@@ -1,3 +1,4 @@
 from django.shortcuts import render
 
-# Create your views here.
+def vista_inventario(request):
+    return render(request, 'inventario/productos.html')  # o 'core/inventario.html' según tu estructura

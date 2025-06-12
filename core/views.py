@@ -6,7 +6,8 @@ def inicio(request):
 
 
 def vista_inventario(request):
-    return render(request, 'core/inventario.html')  # Asegúrate de que este archivo HTML exista
+    return render(request, 'inventario/productos.html')
+  # Asegúrate de que este archivo HTML exista
 
 
 

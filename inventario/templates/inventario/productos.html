@@ -1,21 +1,101 @@
-<h2>Inventario</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Nombre</th>
-      <th>Descripción</th>
-      <th>Precio</th>
-      <th>Stock</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for producto in productos %}
-      <tr>
-        <td>{{ producto.nombre }}</td>
-        <td>{{ producto.descripcion }}</td>
-        <td>{{ producto.precio }}</td>
-        <td>{{ producto.stock }}</td>
-      </tr>
+{% extends 'base.html' %}
+{% block title %}Inventario{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Inventario de Productos</h2>
+    <a href="{% url 'agregar_producto' %}" class="btn btn-primary">
+        <i class="bi bi-plus"></i> Agregar Producto
+    </a>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     {% endfor %}
-  </tbody>
-</table>
+{% endif %}
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Precio Unitario</th>
+                <th>Cantidad</th>
+                <th>Total</th>
+                <th>Fecha Ingreso</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for producto in productos %}
+            <tr>
+                <td><code>{{ producto.codigo }}</code></td>
+                <td>
+                    <strong>{{ producto.nombre }}</strong>
+                    {% if producto.descripcion %}
+                        <br><small class="text-muted">{{ producto.descripcion|truncatewords:10 }}</small>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="badge bg-secondary">{{ producto.categoria.nombre }}</span>
+                </td>
+                <td>₲ {{ producto.precio_unitario|floatformat:0 }}</td>
+                <td>
+                    {% if producto.cantidad > 0 %}
+                        <span class="badge bg-success">{{ producto.cantidad }}</span>
+                    {% else %}
+                        <span class="badge bg-danger">Sin stock</span>
+                    {% endif %}
+                </td>
+                <td><strong>₲ {{ producto.total|floatformat:0 }}</strong></td>
+                <td>{{ producto.fecha_ingreso|date:"d/m/Y" }}</td>
+                <td>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <a href="{% url 'editar_producto' producto.id %}" class="btn btn-outline-primary" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'eliminar_producto' producto.id %}" class="btn btn-outline-danger" title="Eliminar">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center text-muted py-4">
+                    <i class="bi bi-box-seam display-1"></i>
+                    <p class="mt-2">No hay productos en el inventario.</p>
+                    <a href="{% url 'agregar_producto' %}" class="btn btn-primary">
+                        <i class="bi bi-plus"></i> Agregar el primer producto
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if productos %}
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Resumen del Inventario</h5>
+                <p class="card-text">
+                    <strong>Total de productos:</strong> {{ productos|length }}<br>
+                    <strong>Productos sin stock:</strong> 
+                    {% widthratio productos|length 1 1 as total_productos %}
+                    {{ productos|length|add:"-"|add:productos|length }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Agregar Producto{% endblock %}
+
+{% block content %}
+<h2>Agregar Nuevo Producto</h2>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+        <label class="form-label">Código del Producto</label>
+        {{ form.codigo }}
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Nombre del Producto</label>
+        {{ form.nombre }}
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        {{ form.descripcion }}
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Precio Unitario</label>
+        {{ form.precio_unitario }}
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Cantidad</label>
+        {{ form.cantidad }}
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a href="{% url 'vista_inventario' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+
+{% if form.errors %}
+    <div class="alert alert-danger mt-3">
+        {{ form.errors }}
+    </div>
+{% endif %}
+{% endblock %}

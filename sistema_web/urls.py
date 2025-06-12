@@ -20,4 +20,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),  # <--- conectar con tu app principal
+    path('inventario/', include('inventario.urls')),  # Aquí conectás la app
 ]

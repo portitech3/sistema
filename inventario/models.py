@@ -12,18 +12,18 @@ class Categoria(models.Model):
         verbose_name_plural = "Categorías"
 
 class Producto(models.Model):
-    codigo = models.CharField(max_length=50, unique=True, help_text="Código único del producto")
+    codigo = models.CharField(max_length=20)
     nombre = models.CharField(max_length=100)
-    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
-    descripcion = models.TextField(blank=True)
-    fecha_ingreso = models.DateTimeField(default=timezone.now)
+    descripcion = models.TextField(blank=True, null=True)
+    categoria = models.ForeignKey('Categoria', on_delete=models.SET_NULL, null=True, blank=True)
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
-    cantidad = models.IntegerField(default=0)
-    
+    cantidad = models.IntegerField()
+    fecha_ingreso = models.DateField(auto_now_add=True)
+
     @property
     def total(self):
-        """Calcula el total (precio_unitario * cantidad)"""
         return self.precio_unitario * self.cantidad
+
     
     @property
     def stock(self):

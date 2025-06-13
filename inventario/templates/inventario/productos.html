@@ -18,6 +18,9 @@
     {% endfor %}
 {% endif %}
 
+<p>Total productos disponibles: {{ productos|length }}</p>
+
+
 <div class="table-responsive">
     <table class="table table-bordered table-hover">
         <thead class="table-dark">
@@ -42,8 +45,13 @@
                         <br><small class="text-muted">{{ producto.descripcion|truncatewords:10 }}</small>
                     {% endif %}
                 </td>
+                <!-- ✅ CORRECCIÓN HECHA AQUÍ -->
                 <td>
-                    <span class="badge bg-secondary">{{ producto.categoria.nombre }}</span>
+                    {% if producto.categoria %}
+                        <span class="badge bg-secondary">{{ producto.categoria.nombre }}</span>
+                    {% else %}
+                        <span class="badge bg-light text-muted">Sin categoría</span>
+                    {% endif %}
                 </td>
                 <td>₲ {{ producto.precio_unitario|floatformat:0 }}</td>
                 <td>
@@ -89,9 +97,7 @@
                 <h5 class="card-title">Resumen del Inventario</h5>
                 <p class="card-text">
                     <strong>Total de productos:</strong> {{ productos|length }}<br>
-                    <strong>Productos sin stock:</strong> 
-                    {% widthratio productos|length 1 1 as total_productos %}
-                    {{ productos|length|add:"-"|add:productos|length }}
+                    <strong>Productos sin stock:</strong> {{ sin_stock }}
                 </p>
             </div>
         </div>

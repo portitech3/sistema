@@ -4,6 +4,12 @@
 {% block content %}
 <h2>Agregar Nuevo Producto</h2>
 
+<p>
+  ¿No encontrás la categoría?
+  <a href="{% url 'agregar_categoria' %}" class="btn btn-link">Crear nueva categoría</a>
+</p>
+
+
 <form method="post">
     {% csrf_token %}
     
@@ -33,7 +39,8 @@
     </div>
     
     <button type="submit" class="btn btn-primary">Guardar</button>
-    <a href="{% url 'vista_inventario' %}" class="btn btn-secondary">Cancelar</a>
+    <a href="{% url 'inventario' %}" class="btn btn-secondary">Cancelar</a>
+
 </form>
 
 {% if form.errors %}

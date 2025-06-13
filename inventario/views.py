@@ -4,11 +4,14 @@ from .models import Producto, Categoria
 from .forms import ProductoForm, CategoriaForm
 
 def vista_inventario(request):
-    """Vista para mostrar todos los productos"""
     productos = Producto.objects.all()
+    print("Productos encontrados:", productos)  # <-- Agregado
+    sin_stock = productos.filter(cantidad=0).count()
     return render(request, 'inventario/productos.html', {
-        'productos': productos
+        'productos': productos,
+        'sin_stock': sin_stock
     })
+
 
 def agregar_producto(request):
     """Vista para agregar un nuevo producto"""
@@ -25,7 +28,7 @@ def agregar_producto(request):
                 producto.categoria = categoria_default
             producto.save()
             messages.success(request, f'Producto "{producto.nombre}" agregado exitosamente.')
-            return redirect('vista_inventario')
+            return redirect('inventario')
     else:
         form = ProductoForm()
     
@@ -42,7 +45,7 @@ def editar_producto(request, producto_id):
         if form.is_valid():
             form.save()
             messages.success(request, f'Producto "{producto.nombre}" actualizado exitosamente.')
-            return redirect('vista_inventario')
+            return redirect('inventario')
     else:
         form = ProductoForm(instance=producto)
     
@@ -59,7 +62,7 @@ def eliminar_producto(request, producto_id):
         nombre_producto = producto.nombre
         producto.delete()
         messages.success(request, f'Producto "{nombre_producto}" eliminado exitosamente.')
-        return redirect('vista_inventario')
+        return redirect('inventario')
     
     return render(request, 'inventario/eliminar_producto.html', {
         'producto': producto

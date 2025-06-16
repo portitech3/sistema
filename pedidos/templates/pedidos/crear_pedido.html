@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Crear Pedido{% endblock %}
+
+{% block content %}
+<h2>Crear Nuevo Pedido</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" class="btn btn-primary">Guardar Pedido</button>
+    <a href="{% url 'lista_pedidos' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

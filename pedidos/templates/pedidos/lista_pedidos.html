@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Lista de Pedidos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Lista de Pedidos</h2>
+    <a href="{% url 'crear_pedido' %}" class="btn btn-success">
+        ➕ Nuevo Pedido
+    </a>
+</div>
+
+
+{% if pedidos %}
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>N°</th>
+            <th>Cliente</th>
+            <th>Categoría</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Estado</th>
+            <th>Fecha recepción</th>
+            <th>Entrega estimada</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pedido in pedidos %}
+        <tr>
+            <td>{{ pedido.id }}</td>
+            <td>{{ pedido.cliente }}</td>
+            <td>{{ pedido.categoria }}</td>
+            <td>{{ pedido.producto }}</td>
+            <td>{{ pedido.cantidad }}</td>
+            <td>{{ pedido.estado }}</td>
+            <td>{{ pedido.fecha_recepcion }}</td>
+            <td>{{ pedido.fecha_entrega_estimada }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="text-muted">No hay pedidos registrados.</p>
+{% endif %}
+{% endblock %}

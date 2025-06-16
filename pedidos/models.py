@@ -1,6 +1,8 @@
+
 from django.db import models
 from django.utils import timezone
-from .models import Producto  # Asegurate de tener este modelo creado
+from inventario.models import Producto  # ✅ CORRECTO
+
 
 class Pedido(models.Model):
     CATEGORIAS = [

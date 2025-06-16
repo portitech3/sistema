@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Producto, Categoria
 from .forms import ProductoForm, CategoriaForm
+from django.db.models import Q
 
 def vista_inventario(request):
     productos = Producto.objects.all()
@@ -81,4 +82,20 @@ def agregar_categoria(request):
     
     return render(request, 'inventario/agregar_categoria.html', {
         'form': form
+    })
+
+def vista_inventario(request):
+    query = request.GET.get('q')
+    productos = Producto.objects.all()
+
+    if query:
+        productos = productos.filter(
+            Q(nombre__icontains=query) | Q(codigo__icontains=query)
+        )
+
+    sin_stock = productos.filter(cantidad=0).count()
+    return render(request, 'inventario/productos.html', {
+        'productos': productos,
+        'sin_stock': sin_stock,
+        'query': query,  # para mantener el valor en el formulario
     })

@@ -1,8 +1,6 @@
-
 from django.db import models
 from django.utils import timezone
-from inventario.models import Producto  # ✅ CORRECTO
-
+from inventario.models import Producto
 
 class Pedido(models.Model):
     CATEGORIAS = [
@@ -29,6 +27,18 @@ class Pedido(models.Model):
     fecha_entrega_estimada = models.DateField(null=True, blank=True)
     fecha_entrega_real = models.DateField(null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        if self.pk:
+            pedido_anterior = Pedido.objects.get(pk=self.pk)
+            if pedido_anterior.estado != self.estado:
+                if self.estado in ['entregado', 'cancelado'] and pedido_anterior.estado not in ['entregado', 'cancelado']:
+                    if self.producto and self.producto.cantidad >= self.cantidad:
+                        self.producto.cantidad -= self.cantidad
+                        self.producto.save()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Pedido #{self.id} - {self.cliente}"
     @property
     def cumplimiento_plazo(self):
         if self.fecha_entrega_real and self.fecha_entrega_estimada:
@@ -53,3 +63,4 @@ class Pedido(models.Model):
 
     def __str__(self):
         return f"Pedido #{self.id} - {self.cliente}"
+

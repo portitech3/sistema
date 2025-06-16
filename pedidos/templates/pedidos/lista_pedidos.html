@@ -9,6 +9,31 @@
     </a>
 </div>
 
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-3">
+    <input type="text" name="cliente" value="{{ cliente }}" class="form-control" placeholder="Buscar por cliente">
+  </div>
+  <div class="col-md-2">
+    <select name="estado" class="form-select">
+      <option value="">Todos los estados</option>
+      <option value="pendiente" {% if estado == "pendiente" %}selected{% endif %}>Pendiente</option>
+      <option value="en_proceso" {% if estado == "en_proceso" %}selected{% endif %}>En proceso</option>
+      <option value="entregado" {% if estado == "entregado" %}selected{% endif %}>Entregado</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <input type="date" name="desde" value="{{ desde }}" class="form-control" placeholder="Desde">
+  </div>
+  <div class="col-md-2">
+    <input type="date" name="hasta" value="{{ hasta }}" class="form-control" placeholder="Hasta">
+  </div>
+  <div class="col-md-3 d-flex gap-2">
+    <button type="submit" class="btn btn-primary">🔍 Filtrar</button>
+    <a href="{% url 'lista_pedidos' %}" class="btn btn-secondary">🧹 Limpiar</a>
+  </div>
+</form>
+
+
 {% if pedidos %}
 <table class="table table-bordered table-hover">
     <thead class="table-dark">

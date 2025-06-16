@@ -3,11 +3,15 @@ from django.contrib import messages
 from .models import Producto, Categoria
 from .forms import ProductoForm, CategoriaForm
 from django.db.models import Q
+from django.db.models import F 
 
 def vista_inventario(request):
     productos = Producto.objects.all()
     print("Productos encontrados:", productos)  # <-- Agregado
     sin_stock = productos.filter(cantidad=0).count()
+    productos_stock_bajo = productos.filter(cantidad__gt=0, cantidad__lte=F('stock_minimo')).count()
+
+
     return render(request, 'inventario/productos.html', {
         'productos': productos,
         'sin_stock': sin_stock

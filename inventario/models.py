@@ -18,6 +18,7 @@ class Producto(models.Model):
     categoria = models.ForeignKey('Categoria', on_delete=models.SET_NULL, null=True, blank=True)
     precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
     cantidad = models.IntegerField()
+    stock_minimo = models.PositiveIntegerField(default=0)  # 👈 ALERTA SI CANTIDAD < STOCK_MINIMO
     fecha_ingreso = models.DateField(auto_now_add=True)
 
     @property

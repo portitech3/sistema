@@ -67,10 +67,12 @@
                 </td>
                 <td>₲ {{ producto.precio_unitario|floatformat:0 }}</td>
                 <td>
-                    {% if producto.cantidad > 0 %}
+                    {% if producto.cantidad == 0 %}
                         <span class="badge bg-success">{{ producto.cantidad }}</span>
+                    {% elif producto.cantidad <= producto.stock_minimo  %}
+                        <span class="badge bg-warning text-dark">Stock bajo ({{ producto.cantidad }})</span>
                     {% else %}
-                        <span class="badge bg-danger">Sin stock</span>
+                         <span class="badge bg-success">{{ producto.cantidad }}</span>
                     {% endif %}
                 </td>
                 <td><strong>₲ {{ producto.total|floatformat:0 }}</strong></td>
@@ -110,6 +112,8 @@
                 <p class="card-text">
                     <strong>Total de productos:</strong> {{ productos|length }}<br>
                     <strong>Productos sin stock:</strong> {{ sin_stock }}
+                    <p><strong>Productos con stock bajo:</strong> {{ productos_stock_bajo }}</p>
+
                 </p>
             </div>
         </div>

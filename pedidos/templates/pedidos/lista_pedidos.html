@@ -9,10 +9,9 @@
     </a>
 </div>
 
-
 {% if pedidos %}
-<table class="table table-bordered">
-    <thead>
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
         <tr>
             <th>N°</th>
             <th>Cliente</th>
@@ -20,8 +19,9 @@
             <th>Producto</th>
             <th>Cantidad</th>
             <th>Estado</th>
-            <th>Fecha recepción</th>
-            <th>Entrega estimada</th>
+            <th>Recepción</th>
+            <th>Entrega Estimada</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
@@ -33,8 +33,13 @@
             <td>{{ pedido.producto }}</td>
             <td>{{ pedido.cantidad }}</td>
             <td>{{ pedido.estado }}</td>
-            <td>{{ pedido.fecha_recepcion }}</td>
-            <td>{{ pedido.fecha_entrega_estimada }}</td>
+            <td>{{ pedido.fecha_recepcion|date:"d/m/Y" }}</td>
+            <td>{{ pedido.fecha_entrega_estimada|date:"d/m/Y" }}</td>
+            <td>
+                <a href="{% url 'detalle_pedido' pedido.id %}" class="btn btn-info btn-sm">🔍 Ver</a>
+                <a href="{% url 'editar_pedido' pedido.id %}" class="btn btn-warning btn-sm">✏️ Editar</a>
+                <a href="{% url 'eliminar_pedido' pedido.id %}" class="btn btn-danger btn-sm">🗑️ Eliminar</a>
+            </td>
         </tr>
         {% endfor %}
     </tbody>

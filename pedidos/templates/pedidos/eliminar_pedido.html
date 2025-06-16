@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Eliminar Pedido{% endblock %}
+
+{% block content %}
+<h2>¿Estás seguro de que deseas eliminar el Pedido N°{{ pedido.id }}?</h2>
+
+<p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
+<p><strong>Producto:</strong> {{ pedido.producto }}</p>
+<p><strong>Fecha de recepción:</strong> {{ pedido.fecha_recepcion }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">🗑️ Eliminar</button>
+    <a href="{% url 'lista_pedidos' %}" class="btn btn-secondary">↩️ Cancelar</a>
+</form>
+{% endblock %}

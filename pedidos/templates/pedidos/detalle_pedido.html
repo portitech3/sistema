@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Detalle del Pedido #{{ pedido.id }}</h2>
+    <ul class="list-group">
+        <li class="list-group-item"><strong>Cliente:</strong> {{ pedido.cliente }}</li>
+        <li class="list-group-item"><strong>Categoría:</strong> {{ pedido.categoria }}</li>
+        <li class="list-group-item"><strong>Producto:</strong> {{ pedido.producto }}</li>
+        <li class="list-group-item"><strong>Cantidad:</strong> {{ pedido.cantidad }}</li>
+        <li class="list-group-item"><strong>Estado:</strong> {{ pedido.estado }}</li>
+        <li class="list-group-item"><strong>Fecha de Recepción:</strong> {{ pedido.fecha_recepcion }}</li>
+        <li class="list-group-item"><strong>Fecha Entrega Estimada:</strong> {{ pedido.fecha_entrega_estimada }}</li>
+        <li class="list-group-item"><strong>Fecha Entrega Real:</strong> {{ pedido.fecha_entrega_real }}</li>
+        <li class="list-group-item"><strong>Descripción:</strong> {{ pedido.descripcion }}</li>
+    </ul>
+    <a href="{% url 'lista_pedidos' %}" class="btn btn-secondary mt-3">⬅ Volver a la lista</a>
+</div>
+{% endblock %}

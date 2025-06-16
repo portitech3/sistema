@@ -38,6 +38,7 @@ AUTH_USER_MODEL = 'core.Usuario'
 INSTALLED_APPS = [
     'core',
     'inventario',
+    'pedidos',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

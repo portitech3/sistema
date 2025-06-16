@@ -46,3 +46,16 @@ class CategoriaForm(forms.ModelForm):
             'nombre': 'Nombre de la Categoría',
             'descripcion': 'Descripción'
         }
+
+
+class AgregarStockForm(forms.Form):
+    producto = forms.ModelChoiceField(
+        queryset=Producto.objects.all(),
+        label="Producto",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    cantidad = forms.IntegerField(
+        min_value=1,
+        label="Cantidad a agregar",
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )

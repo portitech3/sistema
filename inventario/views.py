@@ -4,17 +4,66 @@ from .models import Producto, Categoria
 from .forms import ProductoForm, CategoriaForm
 from django.db.models import Q
 from django.db.models import F 
+from .forms import AgregarStockForm
+import openpyxl
+from django.http import HttpResponse
+
+def exportar_excel(request):
+    productos = Producto.objects.all()
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Inventario"
+
+    # Encabezados
+    encabezados = ["Código", "Nombre", "Descripción", "Categoría", "Precio Unitario", "Cantidad", "Stock Mínimo", "Total"]
+    ws.append(encabezados)
+
+    # Datos
+    for p in productos:
+        ws.append([
+            p.codigo,
+            p.nombre,
+            p.descripcion,
+            p.categoria.nombre if p.categoria else "",
+            float(p.precio_unitario),
+            p.cantidad,
+            p.stock_minimo,
+            float(p.total)
+        ])
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=Inventario.xlsx'
+    wb.save(response)
+    return response
+
+
+def agregar_stock(request):
+    if request.method == 'POST':
+        form = AgregarStockForm(request.POST)
+        if form.is_valid():
+            producto = form.cleaned_data['producto']
+            cantidad = form.cleaned_data['cantidad']
+            producto.cantidad += cantidad
+            producto.save()
+            messages.success(request, f'Se agregaron {cantidad} unidades al producto "{producto.nombre}".')
+            return redirect('inventario')
+    else:
+        form = AgregarStockForm()
+    
+    return render(request, 'inventario/agregar_stock.html', {'form': form})
 
 def vista_inventario(request):
     productos = Producto.objects.all()
-    print("Productos encontrados:", productos)  # <-- Agregado
     sin_stock = productos.filter(cantidad=0).count()
     productos_stock_bajo = productos.filter(cantidad__gt=0, cantidad__lte=F('stock_minimo')).count()
-
+    lista_stock_bajo = productos.filter(cantidad__gt=0, cantidad__lte=F('stock_minimo'))
 
     return render(request, 'inventario/productos.html', {
         'productos': productos,
-        'sin_stock': sin_stock
+        'sin_stock': sin_stock,
+        'productos_stock_bajo': productos_stock_bajo,
+        'lista_stock_bajo': lista_stock_bajo,  # 👈 Esto era lo que faltaba
     })
 
 
@@ -86,20 +135,4 @@ def agregar_categoria(request):
     
     return render(request, 'inventario/agregar_categoria.html', {
         'form': form
-    })
-
-def vista_inventario(request):
-    query = request.GET.get('q')
-    productos = Producto.objects.all()
-
-    if query:
-        productos = productos.filter(
-            Q(nombre__icontains=query) | Q(codigo__icontains=query)
-        )
-
-    sin_stock = productos.filter(cantidad=0).count()
-    return render(request, 'inventario/productos.html', {
-        'productos': productos,
-        'sin_stock': sin_stock,
-        'query': query,  # para mantener el valor en el formulario
     })

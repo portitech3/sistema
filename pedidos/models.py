@@ -64,3 +64,17 @@ class Pedido(models.Model):
     def __str__(self):
         return f"Pedido #{self.id} - {self.cliente}"
 
+from django.db import models
+from .models import Pedido
+
+class HistorialPedido(models.Model):
+    pedido = models.ForeignKey(Pedido, on_delete=models.SET_NULL, null=True, blank=True)
+    cliente = models.CharField(max_length=255, blank=True, null=True)
+    estado_anterior = models.CharField(max_length=100, blank=True, null=True)
+    estado_nuevo = models.CharField(max_length=100, blank=True, null=True)
+    cantidad_anterior = models.IntegerField(blank=True, null=True)  # <-- agrega esto
+    cantidad_nueva = models.IntegerField(blank=True, null=True)     # <-- y esto
+    producto_anterior = models.CharField(max_length=255, blank=True, null=True)
+    producto_nuevo = models.CharField(max_length=255, blank=True, null=True)
+    observacion = models.TextField(blank=True, null=True)
+    fecha = models.DateTimeField(auto_now_add=True)

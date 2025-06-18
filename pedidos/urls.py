@@ -7,5 +7,6 @@ urlpatterns = [
     path('<int:pedido_id>/', views.detalle_pedido, name='detalle_pedido'),
     path('editar/<int:pedido_id>/', views.editar_pedido, name='editar_pedido'),
     path('eliminar/<int:pedido_id>/', views.eliminar_pedido, name='eliminar_pedido'),
+    path('historial/', views.historial_pedidos, name='historial_pedidos'),
 
 ]

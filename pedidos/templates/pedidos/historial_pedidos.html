@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Historial de Cambios{% endblock %}
+
+{% block content %}
+<h2>Historial de Cambios de Pedidos</h2>
+
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Pedido</th>
+            <th>Cliente</th>
+            <th>Estado anterior</th>
+            <th>Estado nuevo</th>
+            <th>Cantidad anterior</th>
+            <th>Cantidad nueva</th>
+            <th>Producto anterior</th>
+            <th>Producto nuevo</th>
+            <th>Fecha</th>
+            <th>Observación</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for h in historial %}
+        <tr>
+            <td>
+                {% if h.pedido %}
+                    #{{ h.pedido.id }}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+
+            <td>{% if "cliente" in h.observacion %}<span style="background:#ffcc00;">{{ h.cliente }}</span>{% else %}{{ h.cliente }}{% endif %}</td>
+
+            <td>{% if "estado:" in h.observacion %}<span style="background:#ffcc00;">{{ h.estado_anterior }}</span>{% else %}{{ h.estado_anterior }}{% endif %}</td>
+
+            <td>{% if "estado:" in h.observacion %}<span style="background:#ffcc00;">{{ h.estado_nuevo }}</span>{% else %}{{ h.estado_nuevo }}{% endif %}</td>
+
+            <td>{{ h.cantidad_anterior }}</td>
+            <td>{{ h.cantidad_nueva }}</td>
+            <td>{{ h.producto_anterior }}</td>
+            <td>{{ h.producto_nuevo }}</td>
+            <td>{{ h.fecha|date:"d/m/Y H:i" }}</td>
+            <td>{{ h.observacion }}</td>
+        </tr>
+
+        {% endfor %}
+    </tbody>
+
+</table>
+{% endblock %}

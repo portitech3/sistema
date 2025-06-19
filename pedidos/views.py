@@ -1,20 +1,15 @@
-from django.shortcuts import render, redirect
-from .forms import PedidoForm
-from .models import Pedido
-from django.shortcuts import get_object_or_404
+
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import HistorialPedido
 from django.utils.dateparse import parse_date
-from django.db.models import Q
+from .forms import PedidoForm
+from .models import Pedido, HistorialPedido
 
 def crear_pedido(request):
     if request.method == 'POST':
         form = PedidoForm(request.POST)
         if form.is_valid():
-            pedido = form.save(commit=False)
-
-            # No se descuenta nada aquí aún
-            pedido.save()
+            pedido = form.save()
             messages.success(request, 'Pedido creado exitosamente.')
             return redirect('lista_pedidos')
     else:
@@ -22,11 +17,10 @@ def crear_pedido(request):
     
     return render(request, 'pedidos/crear_pedido.html', {'form': form})
 
-
-
 def lista_pedidos(request):
     pedidos = Pedido.objects.all()
 
+    # Filtros
     cliente = request.GET.get('cliente')
     estado = request.GET.get('estado')
     desde = request.GET.get('desde')
@@ -34,13 +28,10 @@ def lista_pedidos(request):
 
     if cliente:
         pedidos = pedidos.filter(cliente__icontains=cliente)
-
     if estado:
         pedidos = pedidos.filter(estado=estado)
-
     if desde:
         pedidos = pedidos.filter(fecha_recepcion__gte=parse_date(desde))
-
     if hasta:
         pedidos = pedidos.filter(fecha_recepcion__lte=parse_date(hasta))
 
@@ -52,69 +43,33 @@ def lista_pedidos(request):
         'hasta': hasta,
     })
 
-
 def detalle_pedido(request, pedido_id):
     pedido = get_object_or_404(Pedido, id=pedido_id)
-    return render(request, 'pedidos/detalle_pedido.html', {'pedido': pedido})
-
-
-# sistema/pedidos/views.py
+    historial = pedido.historial.all()[:10]  # Últimos 10 cambios
+    return render(request, 'pedidos/detalle_pedido.html', {
+        'pedido': pedido,
+        'historial': historial
+    })
 
 def editar_pedido(request, pedido_id):
     pedido = get_object_or_404(Pedido, id=pedido_id)
-    estado_anterior = pedido.estado
-    cantidad_anterior = pedido.cantidad
-    producto_anterior = pedido.producto.nombre if pedido.producto else None
-
+    
     if request.method == 'POST':
         form = PedidoForm(request.POST, instance=pedido)
         if form.is_valid():
+            # Verificar stock antes de cambiar a estados finales
             pedido_actualizado = form.save(commit=False)
-            cambios = False
-
-            cambios = []
-
-            # Estado
-            if estado_anterior != pedido_actualizado.estado:
-                cambios.append('estado')
-
-            # Cantidad
-            if cantidad_anterior != pedido_actualizado.cantidad:
-                cambios.append('cantidad')
-
-            # Producto
-            nuevo_nombre_producto = pedido_actualizado.producto.nombre if pedido_actualizado.producto else None
-            if producto_anterior != nuevo_nombre_producto:
-                cambios.append('producto')
-
-            cliente_anterior = pedido.cliente.strip() if pedido.cliente else ""
-            cliente_nuevo = pedido_actualizado.cliente.strip() if pedido_actualizado.cliente else ""
-            if cliente_anterior != cliente_nuevo:
-                cambios.append(f"cliente ({cliente_anterior} → {cliente_nuevo})")
-
-            # Si cambia estado a entregado o cancelado, hacer descuento
-            if pedido_actualizado.estado in ['cancelado', 'entregado'] and estado_anterior not in ['cancelado', 'entregado']:
-                if pedido_actualizado.producto and pedido_actualizado.producto.cantidad >= pedido_actualizado.cantidad:
-                    pedido_actualizado.producto.cantidad -= pedido_actualizado.cantidad
-                    pedido_actualizado.producto.save()
-                else:
+            
+            # Validación de stock para estados finales
+            if (pedido_actualizado.estado in ['entregado', 'cancelado'] and 
+                pedido.estado not in ['entregado', 'cancelado']):
+                if (pedido_actualizado.producto and 
+                    pedido_actualizado.producto.cantidad < pedido_actualizado.cantidad):
                     messages.error(request, 'Stock insuficiente para completar el pedido.')
-                    return redirect('editar_pedido', pedido_id=pedido.id)
-
+                    return render(request, 'pedidos/editar_pedido.html', {'form': form, 'pedido': pedido})
+            
+            # El historial se crea automáticamente en el modelo
             pedido_actualizado.save()
-
-            if cambios:
-                HistorialPedido.objects.create(
-                    pedido=pedido,
-                    cliente=cliente_nuevo,
-                    estado_anterior=estado_anterior,
-                    estado_nuevo=pedido_actualizado.estado,
-                    cantidad_anterior=cantidad_anterior,
-                    cantidad_nueva=pedido_actualizado.cantidad,
-                    producto_anterior=producto_anterior,
-                    producto_nuevo=pedido_actualizado.producto.nombre if pedido_actualizado.producto else None,
-                    observacion=f"Cambio(s): {', '.join(cambios)}"
-                )
             messages.success(request, 'Pedido actualizado correctamente.')
             return redirect('lista_pedidos')
     else:
@@ -122,22 +77,14 @@ def editar_pedido(request, pedido_id):
 
     return render(request, 'pedidos/editar_pedido.html', {'form': form, 'pedido': pedido})
 
-
 def eliminar_pedido(request, pedido_id):
     pedido = get_object_or_404(Pedido, id=pedido_id)
 
     if request.method == 'POST':
-        # Variables necesarias para historial ANTES de eliminar el pedido
-        estado_anterior = pedido.estado
-        cantidad_anterior = pedido.cantidad
-        producto_anterior = pedido.producto.nombre if pedido.producto else None
-        cliente_actual = pedido.cliente
-
+        # Revertir inventario si el pedido estaba completado
         if pedido.estado in ['entregado', 'cancelado'] and pedido.producto:
             pedido.producto.cantidad += pedido.cantidad
             pedido.producto.save()
-
-
 
         pedido.delete()
         messages.success(request, 'Pedido eliminado correctamente.')
@@ -145,14 +92,23 @@ def eliminar_pedido(request, pedido_id):
 
     return render(request, 'pedidos/eliminar_pedido.html', {'pedido': pedido})
 
-
-
-
-
-
 def historial_pedidos(request):
     historial = HistorialPedido.objects.select_related('pedido').order_by('-fecha')
-    return render(request, 'pedidos/historial_pedidos.html', {'historial': historial})
+    
+    # Filtros opcionales
+    pedido_id = request.GET.get('pedido_id')
+    tipo_cambio = request.GET.get('tipo_cambio')
+    
+    if pedido_id:
+        historial = historial.filter(pedido_id=pedido_id)
+    if tipo_cambio:
+        historial = historial.filter(tipo_cambio=tipo_cambio)
+    
+    return render(request, 'pedidos/historial_pedidos.html', {
+        'historial': historial,
+        'pedido_id': pedido_id,
+        'tipo_cambio': tipo_cambio
+    })
 
 def vista_menu(request):
     pedidos_pendientes = Pedido.objects.filter(estado='pendiente').count()

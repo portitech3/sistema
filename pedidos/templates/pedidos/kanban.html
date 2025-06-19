@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="text-center mb-4">Tablero Kanban de Pedidos</h2>
+<div class="d-flex justify-content-between overflow-auto">
+    {% for estado, pedidos in pedidos_por_estado.items %}
+        <div class="card me-2" style="min-width: 250px;">
+            <div class="card-header text-center">
+                {{ estado|title }}
+            </div>
+            <div class="card-body">
+                {% for pedido in pedidos %}
+                    <div class="card mb-2 shadow-sm p-2">
+                        <strong>{{ pedido.cliente }}</strong><br>
+                        {{ pedido.producto }}<br>
+                        <small>{{ pedido.fecha }}</small>
+                    </div>
+                {% empty %}
+                    <p class="text-muted">Sin pedidos</p>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

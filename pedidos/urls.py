@@ -21,11 +21,9 @@ urlpatterns = [
     path('historial/', views.historial_pedidos, name='historial_pedidos'),
     path('produccion/', views.dashboard_produccion, name='dashboard_produccion'),
 
-        # ... tus otras URLs
-    path('kanban/', views.kanban_board, name='kanban_board'),
-    path('kanban/actualizar-estado/', views.actualizar_estado_pedido, name='actualizar_estado_pedido'),
-    path('pedidos/kanban/', views.kanban_board, name='kanban_board'),
-    path('pedidos/cambiar_estado/<int:pedido_id>/', views.cambiar_estado_pedido, name='cambiar_estado_pedido'),
 
-                    
+    # Kanban views
+    path('kanban/', views.kanban_board, name='kanban_board'),
+    path('actualizar-estado/', views.actualizar_estado_pedido, name='actualizar_estado_pedido'),
+    path('cambiar_estado/<int:pedido_id>/', views.cambiar_estado_pedido, name='cambiar_estado_pedido'),
 ]

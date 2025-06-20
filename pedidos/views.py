@@ -330,17 +330,21 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from .models import Pedido
 
-@csrf_exempt
-def cambiar_estado_pedido(request, pedido_id):
+def cambiar_estado_pedido(request, pedido_id):  # Add pedido_id parameter
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             nuevo_estado = data.get('estado')
 
+            # Use the pedido_id from URL instead of from POST data
             pedido = Pedido.objects.get(pk=pedido_id)
             pedido.estado = nuevo_estado
             pedido.save()
 
             return JsonResponse({'success': True})
+        except Pedido.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Pedido no encontrado'})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)

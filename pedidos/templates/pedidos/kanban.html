@@ -3,130 +3,346 @@
 {% block title %}Tablero Kanban{% endblock %}
 
 {% block content %}
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <style>
+  .kanban-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+    margin: -1.5rem -15px 2rem -15px;
+    border-radius: 0 0 15px 15px;
+  }
+  
   .kanban-board {
     display: flex;
-    gap: 1.5rem;
+    gap: 1.2rem;
     overflow-x: auto;
     padding: 1rem 0;
+    min-height: 70vh;
   }
+  
   .kanban-column {
     background: #f8f9fa;
-    border-radius: 0.5rem;
-    width: 300px;
+    border-radius: 12px;
+    width: 280px;
     padding: 1rem;
     flex-shrink: 0;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
   }
+  
+  .kanban-column:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  }
+  
   .column-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
-    font-weight: bold;
-    font-size: 1.2rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid #e9ecef;
   }
-  .task-card {
-    background: white;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid #dee2e6;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  }
-  .task-title {
+  
+  .column-title {
     font-weight: 600;
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #495057;
   }
-  .task-description {
-    font-size: 0.95rem;
-    color: #555;
-    margin-bottom: 0.5rem;
-  }
-  .task-meta {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.85rem;
-    color: #888;
-  }
-  .inventory-badge {
-    display: inline-block;
-    background: #198754;
+  
+  .column-count {
+    background: #6c757d;
     color: white;
     font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 15px;
+    min-width: 25px;
+    text-align: center;
+  }
+  
+  /* Colores específicos para cada estado */
+  .estado-borrador .column-count { background: #6c757d; }
+  .estado-confirmado .column-count { background: #198754; }
+  .estado-produccion .column-count { background: #fd7e14; }
+  .estado-terminacion .column-count { background: #0d6efd; }
+  .estado-terminado .column-count { background: #6f42c1; }
+  .estado-entregado .column-count { background: #20c997; }
+  
+  .task-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    cursor: move;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  
+  .task-card:hover {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+  }
+  
+  .task-card.dragging {
+    opacity: 0.7;
+    transform: rotate(2deg);
+  }
+  
+  .task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+  }
+  
+  .task-id {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #495057;
+  }
+  
+  .task-info {
+    font-size: 0.85rem;
+    color: #6c757d;
+    line-height: 1.4;
+  }
+  
+  .task-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.8rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid #f1f3f4;
+  }
+  
+  .task-date {
+    font-size: 0.75rem;
+    color: #6c757d;
+    background: #f8f9fa;
     padding: 0.2rem 0.5rem;
-    border-radius: 0.5rem;
+    border-radius: 4px;
+  }
+  
+  .task-category {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  
+  .categoria-venta {
+    background: #d4edda;
+    color: #155724;
+  }
+  
+  .categoria-reparacion {
+    background: #cce5ff;
+    color: #004085;
+  }
+  
+  .inventory-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #28a745;
+    color: white;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+  
+  .empty-column {
+    text-align: center;
+    color: #adb5bd;
+    padding: 2rem 1rem;
+    font-style: italic;
+  }
+  
+  .drag-over {
+    background: #e3f2fd !important;
+    border: 2px dashed #2196f3 !important;
+  }
+  
+  .stats-row {
+    margin-bottom: 1.5rem;
+  }
+  
+  .stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  
+  .stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
     margin-bottom: 0.3rem;
+  }
+  
+  .stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 </style>
 
-<div class="container mt-4">
-  <h2 class="mb-4 text-center">📋 Tablero Kanban de Pedidos</h2>
-  <div class="kanban-board">
-    {% for estado, pedidos in pedidos_por_estado.items %}
-      <div class="kanban-column" id="columna-{{ estado }}" ondragover="handleDragOver(event)" ondrop="handleDrop(event, '{{ estado }}')">
-        <div class="column-header">
-          <span>
-            {% if estado == 'borrador' %}📝{% elif estado == 'confirmado' %}✅{% elif estado == 'produccion' %}⚙️{% elif estado == 'terminacion' %}🔧{% elif estado == 'terminado' %}✨{% elif estado == 'entregado' %}🚛{% endif %}
-            {{ estado|title }}
-          </span>
-          <span class="badge bg-secondary">{{ pedidos|length }}</span>
-        </div>
+<div class="kanban-header text-center">
+  <h2 class="mb-1">📋 Tablero Kanban</h2>
+  <p class="mb-0 opacity-75">Gestión visual de pedidos</p>
+</div>
 
-        {% for pedido in pedidos %}
-          <div class="task-card" draggable="true" ondragstart="handleDragStart(event)" data-id="{{ pedido.id }}">
-            {% if pedido.inventario_descontado %}
-              <div class="inventory-badge">Inventario ✓</div>
-            {% endif %}
-            <div class="task-title">Pedido #{{ pedido.id }}</div>
-            <div class="task-description">Cliente: {{ pedido.cliente }}<br>Producto: {{ pedido.producto }}<br>Cantidad: {{ pedido.cantidad }}</div>
-            <div class="task-meta">
-              <span>
-                {% if estado == 'borrador' %}{{ pedido.fecha_creacion|date:"d/m" }}
-                {% elif estado == 'confirmado' %}{{ pedido.fecha_confirmacion|date:"d/m" }}
-                {% elif estado == 'produccion' %}{{ pedido.fecha_inicio_produccion|date:"d/m" }}
-                {% elif estado == 'terminacion' %}{{ pedido.fecha_terminacion|date:"d/m" }}
-                {% elif estado == 'terminado' %}{{ pedido.fecha_terminado|date:"d/m" }}
-                {% elif estado == 'entregado' %}{{ pedido.fecha_entrega_real|date:"d/m" }}
-                {% endif %}
-              </span>
-              <span>{{ pedido.categoria|default:"-" }}</span>
-            </div>
-          </div>
-        {% empty %}
-          <p class="text-muted">Sin pedidos</p>
-        {% endfor %}
-
-      </div>
-    {% endfor %}
+<!-- Estadísticas rápidas -->
+<div class="row stats-row">
+  <div class="col-md-2">
+    <div class="stat-card">
+      <div class="stat-number text-secondary">{{ pedidos_por_estado.borrador|length }}</div>
+      <div class="stat-label">Borradores</div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="stat-card">
+      <div class="stat-number text-success">{{ pedidos_por_estado.confirmado|length }}</div>
+      <div class="stat-label">Confirmados</div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="stat-card">
+      <div class="stat-number text-warning">{{ pedidos_por_estado.produccion|length }}</div>
+      <div class="stat-label">Producción</div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="stat-card">
+      <div class="stat-number text-primary">{{ pedidos_por_estado.terminacion|length }}</div>
+      <div class="stat-label">Terminación</div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="stat-card">
+      <div class="stat-number text-purple">{{ pedidos_por_estado.terminado|length }}</div>
+      <div class="stat-label">Terminados</div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="stat-card">
+      <div class="stat-number text-info">{{ pedidos_por_estado.entregado|length }}</div>
+      <div class="stat-label">Entregados</div>
+    </div>
   </div>
 </div>
-{% endblock %}
 
-{% block extra_scripts %}
+<div class="kanban-board">
+  {% for estado, pedidos in pedidos_por_estado.items %}
+    <div class="kanban-column estado-{{ estado }}" 
+         id="columna-{{ estado }}" 
+         ondragover="handleDragOver(event)" 
+         ondrop="handleDrop(event, '{{ estado }}')">
+      
+      <div class="column-header">
+        <div class="column-title">
+          {% if estado == 'borrador' %}📝 Borrador
+          {% elif estado == 'confirmado' %}✅ Confirmado
+          {% elif estado == 'produccion' %}⚙️ Producción
+          {% elif estado == 'terminacion' %}🔧 Terminación
+          {% elif estado == 'terminado' %}✨ Terminado
+          {% elif estado == 'entregado' %}🚛 Entregado
+          {% endif %}
+        </div>
+        <span class="column-count">{{ pedidos|length }}</span>
+      </div>
+
+      {% for pedido in pedidos %}
+        <div class="task-card" 
+             draggable="true" 
+             ondragstart="handleDragStart(event)" 
+             ondragend="handleDragEnd(event)"
+             data-id="{{ pedido.id }}">
+          
+          {% if pedido.inventario_descontado %}
+            <div class="inventory-badge">✓</div>
+          {% endif %}
+          
+          <div class="task-header">
+            <div class="task-id">Pedido #{{ pedido.id }}</div>
+          </div>
+          
+          <div class="task-info">
+            <div><strong>{{ pedido.cliente }}</strong></div>
+            <div>{{ pedido.producto|default:"Sin producto" }}</div>
+            <div>Cantidad: {{ pedido.cantidad }}</div>
+          </div>
+          
+          <div class="task-footer">
+            <div class="task-date">
+              {% if estado == 'borrador' %}{{ pedido.fecha_creacion|date:"d/m" }}
+              {% elif estado == 'confirmado' %}{{ pedido.fecha_confirmacion|date:"d/m"|default:"--/--" }}
+              {% elif estado == 'produccion' %}{{ pedido.fecha_inicio_produccion|date:"d/m"|default:"--/--" }}
+              {% elif estado == 'terminacion' %}{{ pedido.fecha_terminacion|date:"d/m"|default:"--/--" }}
+              {% elif estado == 'terminado' %}{{ pedido.fecha_terminado|date:"d/m"|default:"--/--" }}
+              {% elif estado == 'entregado' %}{{ pedido.fecha_entrega_real|date:"d/m"|default:"--/--" }}
+              {% endif %}
+            </div>
+            {% if pedido.categoria %}
+              <span class="task-category categoria-{{ pedido.categoria }}">
+                {{ pedido.get_categoria_display }}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+      {% empty %}
+        <div class="empty-column">
+          <div>Sin pedidos</div>
+        </div>
+      {% endfor %}
+
+    </div>
+  {% endfor %}
+</div>
+
 <script>
   let dragged;
 
   function handleDragStart(event) {
     dragged = event.target;
+    event.target.classList.add('dragging');
     event.dataTransfer.effectAllowed = "move";
+  }
+
+  function handleDragEnd(event) {
+    event.target.classList.remove('dragging');
   }
 
   function handleDragOver(event) {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
+    event.currentTarget.classList.add('drag-over');
+  }
+
+  function handleDragLeave(event) {
+    event.currentTarget.classList.remove('drag-over');
   }
 
   function handleDrop(event, nuevoEstado) {
     event.preventDefault();
+    event.currentTarget.classList.remove('drag-over');
+    
     const pedidoId = dragged.dataset.id;
     const columnaDestino = document.getElementById(`columna-${nuevoEstado}`);
+    
+    // Mover visualmente la tarjeta
     columnaDestino.appendChild(dragged);
-
+    
+    // Actualizar contador de la columna
+    actualizarContadores();
+    
+    // Enviar al servidor
     fetch(`/pedidos/cambiar_estado/${pedidoId}/`, {
       method: 'POST',
       headers: {
@@ -138,10 +354,46 @@
     .then(res => res.json())
     .then(data => {
       if (!data.success) {
-        alert('Error al actualizar el estado.');
+        alert('Error al actualizar el estado: ' + (data.error || 'Error desconocido'));
         location.reload();
+      } else {
+        // Mostrar notificación de éxito
+        mostrarNotificacion('Pedido actualizado correctamente', 'success');
       }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error de conexión');
+      location.reload();
     });
+  }
+
+  function actualizarContadores() {
+    document.querySelectorAll('.kanban-column').forEach(column => {
+      const contador = column.querySelector('.column-count');
+      const tarjetas = column.querySelectorAll('.task-card').length;
+      contador.textContent = tarjetas;
+    });
+  }
+
+  function mostrarNotificacion(mensaje, tipo) {
+    // Crear elemento de notificación
+    const notif = document.createElement('div');
+    notif.className = `alert alert-${tipo === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    notif.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notif.innerHTML = `
+      ${mensaje}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notif);
+    
+    // Auto-remover después de 3 segundos
+    setTimeout(() => {
+      if (notif.parentNode) {
+        notif.remove();
+      }
+    }, 3000);
   }
 
   function getCookie(name) {
@@ -158,5 +410,11 @@
     }
     return cookieValue;
   }
+
+  // Agregar event listeners para drag leave
+  document.querySelectorAll('.kanban-column').forEach(column => {
+    column.addEventListener('dragleave', handleDragLeave);
+  });
 </script>
+
 {% endblock %}

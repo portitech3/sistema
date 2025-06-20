@@ -25,6 +25,7 @@ urlpatterns = [
     path('kanban/', views.kanban_board, name='kanban_board'),
     path('kanban/actualizar-estado/', views.actualizar_estado_pedido, name='actualizar_estado_pedido'),
     path('pedidos/kanban/', views.kanban_board, name='kanban_board'),
+    path('pedidos/cambiar_estado/<int:pedido_id>/', views.cambiar_estado_pedido, name='cambiar_estado_pedido'),
 
                     
 ]

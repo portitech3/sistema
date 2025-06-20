@@ -323,3 +323,24 @@ def kanban_board(request):
     return render(request, 'pedidos/kanban.html', {
         'pedidos_por_estado': pedidos_por_estado
     })
+
+
+from django.http import JsonResponse
+import json
+from django.views.decorators.csrf import csrf_exempt
+from .models import Pedido
+
+@csrf_exempt
+def cambiar_estado_pedido(request, pedido_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            nuevo_estado = data.get('estado')
+
+            pedido = Pedido.objects.get(pk=pedido_id)
+            pedido.estado = nuevo_estado
+            pedido.save()
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})

@@ -62,29 +62,13 @@
     border-radius: 0.5rem;
     margin-bottom: 0.3rem;
   }
-  .add-task-btn {
-    width: 100%;
-    margin-top: 0.5rem;
-    padding: 0.5rem;
-    font-size: 0.9rem;
-    border: 1px dashed #6c757d;
-    background: transparent;
-    color: #6c757d;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-  .add-task-btn:hover {
-    background: #6c757d;
-    color: white;
-  }
 </style>
 
 <div class="container mt-4">
   <h2 class="mb-4 text-center">📋 Tablero Kanban de Pedidos</h2>
   <div class="kanban-board">
     {% for estado, pedidos in pedidos_por_estado.items %}
-      <div class="kanban-column">
+      <div class="kanban-column" id="columna-{{ estado }}" ondragover="handleDragOver(event)" ondrop="handleDrop(event, '{{ estado }}')">
         <div class="column-header">
           <span>
             {% if estado == 'borrador' %}📝{% elif estado == 'confirmado' %}✅{% elif estado == 'produccion' %}⚙️{% elif estado == 'terminacion' %}🔧{% elif estado == 'terminado' %}✨{% elif estado == 'entregado' %}🚛{% endif %}
@@ -94,7 +78,7 @@
         </div>
 
         {% for pedido in pedidos %}
-          <div class="task-card">
+          <div class="task-card" draggable="true" ondragstart="handleDragStart(event)" data-id="{{ pedido.id }}">
             {% if pedido.inventario_descontado %}
               <div class="inventory-badge">Inventario ✓</div>
             {% endif %}
@@ -117,9 +101,62 @@
           <p class="text-muted">Sin pedidos</p>
         {% endfor %}
 
-        <a href="{% url 'crear_pedido' %}" class="add-task-btn">+ Agregar pedido</a>
       </div>
     {% endfor %}
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  let dragged;
+
+  function handleDragStart(event) {
+    dragged = event.target;
+    event.dataTransfer.effectAllowed = "move";
+  }
+
+  function handleDragOver(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }
+
+  function handleDrop(event, nuevoEstado) {
+    event.preventDefault();
+    const pedidoId = dragged.dataset.id;
+    const columnaDestino = document.getElementById(`columna-${nuevoEstado}`);
+    columnaDestino.appendChild(dragged);
+
+    fetch(`/pedidos/cambiar_estado/${pedidoId}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({ estado: nuevoEstado })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        alert('Error al actualizar el estado.');
+        location.reload();
+      }
+    });
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
 {% endblock %}

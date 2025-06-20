@@ -1,4 +1,4 @@
-# 🧾 Sistema de Inventario y Gestión de Pedidos, estoy probando
+# 🧾 Sistema de Inventario y Gestión de Pedidos, volvimos
 
 Este es un sistema web desarrollado con Django para la gestión de inventario, pedidos y visualización mediante tablero Kanban. Ideal para pequeñas empresas.
 
@@ -23,3 +23,4 @@ Este es un sistema web desarrollado con Django para la gestión de inventario, p
    git clone https://github.com/portitech3/sistema.git
    cd sistema
 
+## hola como estas?

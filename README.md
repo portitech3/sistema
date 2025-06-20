@@ -1,4 +1,4 @@
-# 🧾 Sistema de Inventario y Gestión de Pedidos
+# 🧾 Sistema de Inventario y Gestión de Pedidos, estoy probando
 
 Este es un sistema web desarrollado con Django para la gestión de inventario, pedidos y visualización mediante tablero Kanban. Ideal para pequeñas empresas.
 
